@@ -8,8 +8,6 @@
 import Vapor
 import Fluent
 
-//class SomeClass: Validatable
-
 enum State: String, Codable {
     case todo, doing, done
 }
@@ -41,30 +39,5 @@ final class Task: Model, Content {
         self.body = body
         self.due_date = due_date
         self.state = state
-    }
-}
-
-struct CreateTask: Migration {
-    func prepare(on database: Database) -> EventLoopFuture<Void> {
-        return database.enum("state")
-            .case("todo")
-            .case("doing")
-            .case("done")
-            .create()
-            .flatMap { state in
-                return database.schema("tasks")
-                    .id()
-                    .field("title", .string, .required)
-                    .field("body", .string)
-                    .field("due_date", .date, .required)
-                    .field("state", .string, .required)
-                    .create()
-            }
-    }
-    
-    func revert(on database: Database) -> EventLoopFuture<Void> {
-        return database.schema("tasks").delete().flatMap {
-            return database.enum("state").delete()
-        }
     }
 }
